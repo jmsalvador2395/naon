@@ -221,6 +221,7 @@ def evaluate(args, eval_dataset, model, prefix=""):
         for batch in tqdm(eval_dataloader, desc="Evaluating"):
             model.eval()
             batch = tuple(t.to(args.device) for t in batch)
+            import pdb; pdb.set_trace()
 
             tru = batch[3].view(-1).tolist()
             true_num = batch[2].view(-1)
@@ -411,6 +412,16 @@ def load_and_cache_examples_test(args, task, evaluate=False):
 
 
 def main():
+    def str_to_bool(value):
+        """Convert a string to a boolean value."""
+        if isinstance(value, bool):
+            return value
+        if value.lower() in {'true', 'yes', 'y', '1'}:
+            return True
+        elif value.lower() in {'false', 'no', 'n', '0'}:
+            return False
+        else:
+            raise argparse.ArgumentTypeError(f"Boolean value expected, got {value}")
     parser = argparse.ArgumentParser()
 
     parser.add_argument("--data_dir", default='', type=str,
@@ -429,9 +440,9 @@ def main():
     parser.add_argument("--max_seq_length", default=25, type=int,
                         help="The maximum total input sequence length after tokenization. Sequences longer "
                              "than this will be truncated, sequences shorter will be padded.")
-    parser.add_argument("--do_train", default=True,
+    parser.add_argument("--do_train", default=True, type=str_to_bool,
                         help="Whether to run training.")
-    parser.add_argument("--do_eval", default=True,
+    parser.add_argument("--do_eval", default=True, type=str_to_bool,
                         help="Whether to run eval on the dev set.")
     parser.add_argument("--evaluate_during_training", default=True,
                         help="Rul evaluation during training at each logging step.")
@@ -550,7 +561,12 @@ def main():
         logger.info(" global_step = %s, average loss = %s", global_step, tr_loss)
 
     if not args.do_train:
-        model = torch.load('')
+        #model = torch.load('')
+        path = (
+            '/data/john/clones/nonautoregressive-sentence-ordering/'
+            'model/model.pt'
+        )
+        model = torch.load(path)
         eval_dataset = load_and_cache_examples_test(args, args.task_name, evaluate=True)
         model.to(args.device)
         result = evaluate(args, eval_dataset, model)

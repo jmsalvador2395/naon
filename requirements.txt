@@ -1,0 +1,4 @@
+tensorboardX
+transformers
+boto3
+torch
